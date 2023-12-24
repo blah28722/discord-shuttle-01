@@ -1,8 +1,8 @@
 deploy:
-    cargo shuttle deploy --allow-dirty
-
-deploy_committed:
     cargo shuttle deploy
+
+deploy_dirty:
+    cargo shuttle deploy --allow-dirty
 
 run:
     cargo shuttle run
