@@ -1,13 +1,12 @@
 mod commands;
 
 use poise::serenity_prelude as serenity;
-use shuttle_secrets::SecretStore;
 use shuttle_poise::ShuttlePoise;
+use shuttle_secrets::SecretStore;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
-
 
 #[shuttle_runtime::main]
 async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> ShuttlePoise<Data, Error> {
@@ -18,10 +17,7 @@ async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> Shuttle
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![
-                commands::hello(),
-                commands::ping()
-            ],
+            commands: vec![commands::hello(), commands::ping()],
             pre_command: |ctx| {
                 Box::pin(async move {
                     println!("Executing command {}...", ctx.command().qualified_name);
