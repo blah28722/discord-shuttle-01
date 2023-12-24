@@ -6,28 +6,16 @@ struct Data {} // User data, which is stored and accessible in all command invoc
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
-/// Responds with "world!"
+/// Responds with "my friend!"
 #[poise::command(slash_command)]
 async fn hello(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say("world!").await?;
+    ctx.say("my friend!").await?;
     Ok(())
 }
 /// Responds with "pong!"
 #[poise::command(slash_command)]
 async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("pong!").await?;
-    Ok(())
-}
-
-/// Displays your or another user's account creation date
-#[poise::command(slash_command, prefix_command)]
-async fn age(
-    ctx: Context<'_>,
-    #[description = "Selected user"] user: Option<serenity::User>,
-) -> Result<(), Error> {
-    let u = user.as_ref().unwrap_or_else(|| ctx.author());
-    let response = format!("{}'s account was created at {}", u.name, u.created_at());
-    ctx.say(response).await?;
     Ok(())
 }
 
@@ -42,9 +30,13 @@ async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> Shuttle
         .options(poise::FrameworkOptions {
             commands: vec![
                 hello(),
-                ping(),
-                age()
+                ping()
             ],
+            pre_command: |ctx| {
+                Box::pin(async move {
+                    println!("Executing command {}...", ctx.command().qualified_name);
+                })
+            },
             ..Default::default()
         })
         .token(discord_token)
