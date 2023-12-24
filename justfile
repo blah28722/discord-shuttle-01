@@ -2,7 +2,7 @@ deploy:
     cargo shuttle deploy --allow-dirty
 
 deploy_committed:
-    cargo shuttle deploy
+    cargo shuttle deploy --idle-minutes 0
 
-dev:
-    cargo shuttle project start --idle-minutes 0
+run:
+    cargo shuttle run
