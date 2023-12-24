@@ -459,8 +459,10 @@ dependencies = [
 name = "discord-shuttle-01"
 version = "0.1.2"
 dependencies = [
+ "anyhow",
  "poise",
  "reqwest",
+ "serde",
  "serde_json",
  "shuttle-poise",
  "shuttle-runtime",

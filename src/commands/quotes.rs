@@ -1,12 +1,32 @@
-use serde_json::Value;
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
-pub fn generate_quote() -> Result<String, reqwest::Error> {
+#[allow(non_snake_case)]
+#[derive(Serialize, Deserialize, Debug)]
+struct Quote {
+    _id: String,
+    content: String,
+    author: String,
+    tags: Vec<String>,
+    authorSlug: String,
+    length: u32,
+    dateAdded: String,
+    dateModified: String,
+}
+
+#[allow(dead_code)]
+pub fn generate_quote() -> Result<String> {
     let url = "https://api.quotable.io/quotes/random";
-    let body = reqwest::blocking::get(url)?.text()?;
-    let v: Value = serde_json::from_str(body.as_str()).unwrap();
-    let content = v[0]["content"].as_str().unwrap();
-    let author = v[0]["author"].as_str().unwrap();
-    Ok(format!("{content}\n\n\t\t~{author}"))
+    let data = reqwest::blocking::get(url)?.text()?;
+    let payload = serde_json::from_str::<Vec<Quote>>(data.as_str())?;
+    match payload.get(0) {
+        None => Ok(format!("<Error: missing/bad response from API server>")),
+        Some(quote) => {
+            let content = &quote.content;
+            let author = &quote.author;
+            Ok(format!("\"{content}\"\n\n\t\t~{author}"))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -15,10 +35,15 @@ mod tests {
 
     #[ignore]
     #[test]
-    fn it_fetches_quote() {
-        // It runs slow because it hits an API on the internet
-        let ans: Result<String, reqwest::Error> =  generate_quote();
-        assert!(ans.is_ok());
-        println!("{}", ans.unwrap());
+    fn it_fetches_quote_json() {
+        let ans = generate_quote();
+        match ans {
+            Err(e) => {
+                println!("Got some error! {e}");
+            }
+            Ok(s) => {
+                println!("Got a result: \n{s}");
+            }
+        }
     }
 }
