@@ -12,6 +12,24 @@ async fn hello(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("world!").await?;
     Ok(())
 }
+/// Responds with "pong!"
+#[poise::command(slash_command)]
+async fn ping(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("pong!").await?;
+    Ok(())
+}
+
+/// Displays your or another user's account creation date
+#[poise::command(slash_command, prefix_command)]
+async fn age(
+    ctx: Context<'_>,
+    #[description = "Selected user"] user: Option<serenity::User>,
+) -> Result<(), Error> {
+    let u = user.as_ref().unwrap_or_else(|| ctx.author());
+    let response = format!("{}'s account was created at {}", u.name, u.created_at());
+    ctx.say(response).await?;
+    Ok(())
+}
 
 #[shuttle_runtime::main]
 async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> ShuttlePoise<Data, Error> {
@@ -22,7 +40,11 @@ async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> Shuttle
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![hello()],
+            commands: vec![
+                hello(),
+                ping(),
+                age()
+            ],
             ..Default::default()
         })
         .token(discord_token)
